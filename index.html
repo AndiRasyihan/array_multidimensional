@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status Ketersediaan Fasilitas</title>
+    <script src="data.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f9; }
+        h1 { color: #333; }
+        .info { margin-bottom: 20px; font-style: italic; color: #666; }
+        .area-container { margin-bottom: 30px; border: 1px solid #ddd; padding: 15px; border-radius: 8px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .area-container h2 { color: #000; border-bottom: 2px solid #333; padding-bottom: 5px; margin-top: 0; }
+        .asset-item { margin-bottom: 5px; font-size: 1.1em; }
+        .terpakai { color: #dc3545; font-weight: bold; } /* Merah */
+        .kosong { color: #28a745; font-weight: bold; } /* Hijau */
+        .admin-link { margin-top: 30px; display: block; font-size: 1.1em; }
+    </style>
+</head>
+<body>
+
+    <h1>Status Ketersediaan Fasilitas</h1>
+    <p class="info">Data diperbarui secara real-time (menggunakan Local Storage).</p>
+    
+    <div id="display-container"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentData = getLatestData(); 
+            const container = document.getElementById('display-container');
+
+            // --- Perulangan 3 Tingkat (Array 3D) ---
+            for (let i = 0; i < currentData.length; i++) { // LAPISAN (Area)
+                const area = currentData[i];
+                const areaName = areaLabels[i];
+                
+                let html = `<div class="area-container"><h2>${areaName}</h2>`;
+                
+                for (let j = 0; j < area.length; j++) { // BARIS (Aset)
+                    const asset = area[j];
+                    const assetName = asset[0]; 
+                    const status = asset[1];    
+                    
+                    const statusClass = (status === STATUS_TERPAKAI) ? 'terpakai' : 'kosong';
+                    
+                    // Tampilan item
+                    html += `
+                        <div class="asset-item">
+                            ${assetName}: <span class="${statusClass}">${status}</span>
+                        </div>
+                    `;
+                }
+
+                html += `</div>`;
+                container.innerHTML += html;
+            }
+        });
+    </script>
+</body>
+</html>

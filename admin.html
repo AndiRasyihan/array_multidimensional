@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input Status Fasilitas</title>
+    <script src="data.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9; }
+        h1 { color: #333; }
+        .info { margin-bottom: 20px; color: #007bff; }
+        .area-admin { margin-bottom: 30px; border: 1px solid #ccc; padding: 15px; border-radius: 8px; background-color: #fff; }
+        .area-admin h2 { margin-top: 0; color: #333; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .asset-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dotted #eee; }
+        .asset-info { font-size: 1.05em; }
+        .status-current { font-weight: bold; }
+        .terpakai-status { color: #dc3545; } 
+        .kosong-status { color: #28a745; }
+        .toggle-btn { padding: 8px 15px; border: none; border-radius: 4px; color: white; cursor: pointer; font-weight: bold; }
+        .toggle-btn.kosong-action { background-color: #28a745; } /* Hijau: Aksi SET KOSONG */
+        .toggle-btn.terpakai-action { background-color: #dc3545; } /* Merah: Aksi SET DIPAKAI */
+        #message { margin-top: 20px; padding: 10px; background-color: #e6ffed; border: 1px solid #d4edda; color: #155724; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+    <h1>Input Status Fasilitas</h1>
+    <p class="info">Klik tombol untuk mengubah status. Perubahan akan terlihat di halaman tampilan.</p>
+    
+    <div id="admin-container"></div>
+    <div id="message" style="display:none;"></div>
+    
+    <a href="index.html" style="margin-top: 20px; display: block;">Pindah ke halaman Tampilan Status</a>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', displayAdminPanel);
+
+        function displayAdminPanel() {
+            const currentData = getLatestData();
+            const container = document.getElementById('admin-container');
+            container.innerHTML = ''; // Bersihkan kontainer sebelum merender ulang
+
+            // --- Perulangan 3 Tingkat (Array 3D) ---
+            for (let i = 0; i < currentData.length; i++) { // LAPISAN (Area)
+                const area = currentData[i];
+                const areaName = areaLabels[i];
+                
+                let html = `<div class="area-admin"><h2>${areaName}</h2>`;
+                
+                for (let j = 0; j < area.length; j++) { // BARIS (Aset)
+                    const asset = area[j];
+                    const assetName = asset[0];
+                    const status = asset[1];    
+                    
+                    const statusClass = (status === STATUS_TERPAKAI) ? 'terpakai-status' : 'kosong-status';
+                    
+                    // Teks dan aksi tombol dibalik
+                    const buttonText = (status === STATUS_TERPAKAI) ? 'SET KOSONG' : 'SET DIPAKAI/TERISI';
+                    const buttonActionClass = (status === STATUS_TERPAKAI) ? 'kosong-action' : 'terpakai-action';
+                    
+                    html += `
+                        <div class="asset-row">
+                            <span class="asset-info">${assetName} (Status Saat Ini: <span class="${statusClass}">${status}</span>)</span>
+                            <button class="toggle-btn ${buttonActionClass}" 
+                                onclick="toggleStatus(${i}, ${j}, '${status}')">
+                                ${buttonText}
+                            </button>
+                        </div>
+                    `;
+                }
+                html += `</div>`;
+                container.innerHTML += html;
+            }
+        }
+
+        function toggleStatus(areaIndex, assetIndex, currentStatus) {
+            const currentData = getLatestData();
+            const assetName = currentData[areaIndex][assetIndex][0];
+            
+            // Logika Toggle: Tentukan status baru
+            const newStatus = (currentStatus === STATUS_TERPAKAI) ? STATUS_KOSONG : STATUS_TERPAKAI;
+            
+            // Update Array 3D
+            currentData[areaIndex][assetIndex][1] = newStatus;
+            
+            // Simpan data yang sudah di-update
+            saveUpdatedData(currentData); 
+
+            // Tampilkan pesan
+            const msg = document.getElementById('message');
+            msg.textContent = `Status ${assetName} berhasil diubah menjadi: ${newStatus}`;
+            msg.style.display = 'block';
+            
+            // Render ulang panel admin untuk melihat perubahan
+            displayAdminPanel(); 
+        }
+    </script>
+</body>
+</html>
